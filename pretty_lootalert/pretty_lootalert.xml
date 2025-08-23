@@ -4,7 +4,7 @@
 	<Script file="locale.lua"/>
 	<Script file="core.lua"/>
 
-	<Button name="LootAlertButtonTemplate" parent="UIParent" toplevel="true" frameLevel="120" frameStrata="MEDIUM" hidden="true" virtual="true">
+	<Button name="LootAlertButtonTemplate" parent="UIParent" toplevel="true" frameLevel="120" frameStrata="FULLSCREEN_DIALOG" hidden="true" virtual="true">
 		<Size x="276" y="96"/>
 		<Animations>
 			<AnimationGroup parentKey="animIn">

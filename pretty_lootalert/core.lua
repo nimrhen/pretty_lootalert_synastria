@@ -204,23 +204,20 @@ function LootAlertFrameMixIn:AdjustAnchors()
 	local previousButton;
 	for i=1, LOOTALERT_NUM_BUTTONS do
 		local button = self.alertButton[i];
-		if button then
-			button:ClearAllPoints();
-			if button:IsShown() then
-				local x, y = button:GetCenter();
-				if x and y and (x < 100 and y > (UIParent:GetHeight() - 100)) then
-					button:Hide();
-					return;
-				end
-				if button.waitAndAnimOut:GetProgress() <= 0.74 then
-					if not previousButton or previousButton == button then
-						button:SetPoint("BOTTOM", UIParent, "BOTTOM", point_x, point_y + 128);
+		button:ClearAllPoints();
+		if button and button:IsShown() then
+			if button.waitAndAnimOut:GetProgress() <= 0.74 then
+				if not previousButton or previousButton == button then
+					if DungeonCompletionAlertFrame1:IsShown() then
+						button:SetPoint("BOTTOM", DungeonCompletionAlertFrame1, "TOP", point_x, point_y);
 					else
-						button:SetPoint("BOTTOM", previousButton, "TOP", 0, offset_x);
+						button:SetPoint("CENTER", DungeonCompletionAlertFrame1, "CENTER", point_x, point_y);
 					end
+				else
+					button:SetPoint("BOTTOM", previousButton, "TOP", 0, offset_x);
 				end
-				previousButton = button;
 			end
+			previousButton = button;
 		end
 	end
 end
@@ -232,9 +229,6 @@ function LootAlertFrame_OnLoad(self)
 	self:RegisterEvent("CHAT_MSG_SYSTEM");
 	self:RegisterEvent("CHAT_MSG_MONEY");
 	self:RegisterEvent("UPDATE_BATTLEFIELD_STATUS");
-	self:RegisterEvent("PLAYER_ENTERING_WORLD");
-	self:RegisterEvent("DISPLAY_SIZE_CHANGED");
-	self:RegisterEvent("UI_SCALE_CHANGED");
 
 	mixin(self, LootAlertFrameMixIn);
 end
@@ -287,12 +281,6 @@ local function LootAlertFrame_HandleChatMessage(message)
 end
 
 function LootAlertFrame_OnEvent(self, event, ...)
-	if event == "PLAYER_ENTERING_WORLD" or 
-	   event == "DISPLAY_SIZE_CHANGED" or 
-	   event == "UI_SCALE_CHANGED" then
-		LootAlertFrameMixIn:AdjustAnchors();
-		return;
-	end
 	if event == "CHAT_MSG_LOOT" then
 		local player, label, toast;
 		local itemName					  = arg1:match(P_LOOT_ITEM);
@@ -350,7 +338,21 @@ function LootAlertFrame_OnEvent(self, event, ...)
 			-- print(itemType)
 			
 			if link then
-				LootAlertFrameMixIn:AddAlert(name, link, quality, texture, count, ignlevel, label, toast, rollType, roll);
+				if config.forge then
+					local forgeLevel = GetItemLinkTitanforge(link)
+					if forgeLevel > 0 then
+						if forgeLevel == 1 then
+							label = label.." Titanforged";
+						elseif forgeLevel == 2 then
+							label = label.." Warforged";
+						elseif forgeLevel == 3 then
+							label = label.." Lightforged";
+						end
+						LootAlertFrameMixIn:AddAlert(name, link, quality, texture, count, ignlevel, label, toast, rollType, roll);
+					end
+				else
+					LootAlertFrameMixIn:AddAlert(name, link, quality, texture, count, ignlevel, label, toast, rollType, roll);
+				end	
 			end
 		end
 	end
